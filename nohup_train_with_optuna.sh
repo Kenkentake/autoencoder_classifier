@@ -7,7 +7,7 @@ if [ -e $TRAIN_LOG_FILE ]; then
 fi 
 
 # export CUDA_VISIBLE_DEVICES=0,1,2,3
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=2
 nohup python -u train_with_optuna.py \
   --tmp_results_dir $TMP_RESULTS_DIR \
   >> $TRAIN_LOG_FILE &

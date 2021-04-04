@@ -5,8 +5,8 @@ docker run \
   -dit \
   --gpus all \
   -v $PWD:/workspace \
-  -p 6008:6008 \
+  -p 1010:1010 \
   --name $CONTAINER_NAME\
   --rm \
-  --shm-size=2g \
+  --shm-size=16g \
   $IMAGE_NAME

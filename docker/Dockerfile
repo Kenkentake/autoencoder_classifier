@@ -16,6 +16,7 @@ ENV PYTHONPATH "/workspace:${PYTHONPATH}"
 ENV PIP_OPTIONS "--no-cache-dir --progress-bar off"
 COPY docker/requirements.txt $WORK_PATH/docker/
 RUN pip install ${PIP_OPTIONS} -r $WORK_PATH/docker/requirements.txt && \
+    pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html && \
 		pip install ${PIP_OPTIONS} -U setuptools
 
 # duser setting

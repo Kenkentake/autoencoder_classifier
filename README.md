@@ -437,3 +437,6 @@ Here's where you combine all previous part.
 1. Create an instance of "Model", "Dataset", "DataLoader"
 1. Create an instance of "Trainer" and pass "Model" and "DataLoader" to it.
 1. Now you can train your model by calling "trainer.fit()"
+
+## Acknowledgement
+This repository is forked from [ryuji0123](https://github.com/ryuji0123/cv_dnn)

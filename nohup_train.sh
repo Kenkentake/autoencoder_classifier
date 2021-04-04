@@ -5,7 +5,7 @@ ARGS_FILE="${TMP_RESULTS_DIR}/args.yaml"
 TRAIN_LOG_FILE="${TMP_RESULTS_DIR}/log.txt"
 mkdir -p $TMP_RESULTS_DIR
 
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=0
 nohup python -u train.py \
   --args_file_path $ARGS_FILE \
   --tmp_results_dir $TMP_RESULTS_DIR \
