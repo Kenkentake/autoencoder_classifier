@@ -1,4 +1,4 @@
-# Sample DNN Repository for Computer Vision
+# AutoEncoder_Classifier
 ## Dependencies
 - Driver Version: 430.26
 - CUDA Version: 10.2
@@ -36,138 +36,17 @@ If you want to see train steps and its status with both stdout and mlflow, you c
 
 ## Components
 ### Models
-Define your model.
-
-model/get_model.py
-```py
-from pytorch_lightning import LightningModule
-
-from models.simple_cnn_model import SimpleCNNModel
-
-
-def get_model(args, device) -> LightningModule:
-    model_type = args.TRAIN.MODEL_TYPE.lower()
-
-    if model_type == 'simple_cnn':
-        model = SimpleCNNModel(
-            args=args,
-            device=device,
-            in_channel=args.DATA.INPUT_DIM,
-            out_channel=len(args.DATA.CLASSES),
-        )
-    else:
-        raise NotImplementedError()
-
-    return model
-```
-
-Since we use Pytorch Lightning, models should inherit "LightningModule". 
-
-model/simple_cnn_model.py
-```py
-import torch.nn as nn
-import torch.nn.functional as F
-
-from pytorch_lightning import LightningModule
-
-from optim import get_optimizer, get_scheduler
-
-
-class SimpleCNNModel(LightningModule):
-    def __init__(self, args, device, in_channel, out_channel):
-        super(SimpleCNNModel, self).__init__()
-        self.args = args
-        self._device = device
-        self.cross_entropy_loss = nn.CrossEntropyLoss()
-        
-        # forward
-        self.conv1 = nn.Conv2d(in_channel, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, out_channel)
-
-    def configure_optimizers(self):
-        optimizer = get_optimizer(self.args, self)
-        scheduler = get_scheduler(self.args, optimizer)
-
-        return [optimizer], [scheduler]
-
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-
-        return x
-
-    def training_step(self, batch, batch_idx):
-        inputs, labels = batch
-        
-        outputs = self(inputs)
-
-        loss = self.cross_entropy_loss(outputs, labels)
-
-        self.log('train_loss', loss, on_epoch=True, logger=True)
-
-        return loss
-
-    def validation_step(self, batch, batch_idx):
-        inputs, labels = batch
-        
-        outputs = self(inputs)
-
-        loss = self.cross_entropy_loss(outputs, labels)
-
-        self.log('val_loss', loss, on_epoch=True, logger=True)
-
-        return loss
-```
+- AutoEncoder
+- Classifier using Encoded feature as input
 
 ### Dataset
-Define your dataset.
+We use [Cifar10](https://www.cs.toronto.edu/~kriz/cifar.html) as Dataset and we work on a classification task with a strictly imbalanced training data situation, and so set training data and test data as bellow.
+#### train
+- [bird, dear and truck]: 2500 images for each class
+- [other classes]: 5000 images for each class
+#### test
+- 10000 images (1000 for each class)
 
-data/dataset/get_datatset.py
-```py
-import torchvision.transforms as transforms
-
-from data.dataset.cifer_10_dataset import CIFAR10Dataset
-
-
-def get_transform_from_list(transform_list: list):
-    sequence = []
-
-    for t in transform_list:
-        if t == 'to_tensor':
-            sequence.append(transforms.ToTensor())
-
-        if t == 'normalize':
-            sequence.append(
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-            )
-
-    return transforms.Compose(sequence)
-
-
-def get_dataset(args):
-    transform = get_transform_from_list(args.DATA.TRANSFORM_LIST)
-    dataset_type = args.DATA.DATASET_TYPE.lower()
-
-    if dataset_type == 'cifer10':
-        dataset = CIFAR10Dataset(
-            root=args.DATA.CACHE_DIR,
-            transform=transform,
-            validation_size=args.DATA.VALIDATION_SIZE
-        )
-
-    else:
-        raise NotImplementedError()
-
-    return dataset
-```
 
 ### DataLoader
 Define your dataloader.
