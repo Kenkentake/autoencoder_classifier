@@ -27,19 +27,24 @@ def main(
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     train_data_dict = get_dataset(args).train_data_dict
+    test_data_dict = get_dataset(args).test_data_dict
 
     train_dataloader = get_dataloader(
         batch_size=args.TRAIN.BATCH_SIZE,
-        dataset=train_data_dict['dataset'],
+        dataset=train_data_dict['train_dataset'],
         num_workers=args.DATA.NUM_WORKERS,
-        sampler=train_data_dict['train_sampler'],
     )
 
     validation_dataloader = get_dataloader(
         batch_size=args.TRAIN.BATCH_SIZE,
-        dataset=train_data_dict['dataset'],
+        dataset=train_data_dict['val_dataset'],
         num_workers=args.DATA.NUM_WORKERS,
-        sampler=train_data_dict['validation_sampler'],
+    )
+
+    test_dataloader = get_dataloader(
+        batch_size=args.TRAIN.BATCH_SIZE,
+        dataset=test_data_dict['dataset'],
+        num_workers=args.DATA.NUM_WORKERS,
     )
 
     model = get_model(
@@ -69,6 +74,7 @@ def main(
     try:
         exist_error = False
         trainer.fit(model, train_dataloader, validation_dataloader)
+        trainer.test(test_dataloaders=test_dataloader)
     except Exception:
         run_id = mlflow_logger.run_id
         if run_id is not None:
@@ -76,6 +82,7 @@ def main(
             with open(error_file_path, 'w') as f:
                 traceback.print_exc(file=f)
             exist_error = True
+            print(traceback.format_exc())
             print()
             print('Failed to train. See error_log.txt on mlflow.')
             print(f'Experiment name: {args.MLFLOW.EXPERIMENT_NAME}')
@@ -105,4 +112,4 @@ if __name__ == '__main__':
         tmp_results_dir=option.tmp_results_dir,
         train_log_file_path=option.train_log_file_path
     )
-    print('Finished training')
+    print('Finished test')

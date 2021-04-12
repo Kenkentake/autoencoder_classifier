@@ -100,7 +100,7 @@ class SimpleCNNModel(LightningModule):
             'loss': loss,
         })
 
-    def validation_epoch_end(self, outputs) -> None:
+    def validation_epoch_end(self, outputs) -> dict:
         accuracy = loss = 0.0
         count = 0
         for output in outputs:
@@ -116,3 +116,25 @@ class SimpleCNNModel(LightningModule):
         self.logger.log_metrics(results, step=self.current_epoch)
 
         return results
+
+    def test_step(self, batch, batch_idx):
+        return self.validation_step(batch, batch_idx)
+
+    def test_epoch_end(self, outputs) -> dict:
+        accuracy = loss = 0.0
+        count = 0
+        for output in outputs:
+            accuracy += output['accuracy']
+            loss += output['loss'].data.item()
+            count += output['count']
+
+        results = {
+            'test_accuracy': accuracy / count,
+            'test_loss': loss / count,
+        }
+
+        self.logger.log_metrics(results, step=self.current_epoch)
+
+        return results
+
+    
