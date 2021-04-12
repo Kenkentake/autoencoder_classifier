@@ -54,10 +54,8 @@ class CIFAR10Dataset:
 
         # set target and data to dataset
         train_dataset.targets = targets[train_class_indices]
-        print(np.unique(np.array(train_dataset.targets), return_counts=True)[1])
         train_dataset.data = train_dataset.data[train_class_indices]
         validation_dataset.targets = targets[val_class_indices]
-        print(np.unique(np.array(validation_dataset.targets), return_counts=True)[1])
         validation_dataset.data = validation_dataset.data[val_class_indices]
         train_num = len(train_dataset)
         validation_num = len(validation_dataset)

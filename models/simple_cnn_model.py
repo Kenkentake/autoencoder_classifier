@@ -63,6 +63,7 @@ class SimpleCNNModel(LightningModule):
         accuracy = (outputs.argmax(1) == labels).sum().item()
         loss = self.cross_entropy_loss(outputs, labels)
 
+
         return OrderedDict({
             'accuracy': accuracy,
             'count': labels.shape[0],
@@ -118,21 +119,49 @@ class SimpleCNNModel(LightningModule):
         return results
 
     def test_step(self, batch, batch_idx):
-        return self.validation_step(batch, batch_idx)
+        inputs, labels = batch
+        outputs = self(inputs)
 
+        accuracy = (outputs.argmax(1) == labels).sum().item()
+        loss = self.cross_entropy_loss(outputs, labels)
+
+        # calc indivisual class accuracy
+        class_correct = list(0 for i in range(10))
+        class_counter = list(0 for i in range(10))
+        is_correct = (outputs.argmax(1) == labels).squeeze()
+        for i, pred, label in zip(list(range(len(outputs))), outputs, labels):
+            class_correct[label] += is_correct[i].item()
+            class_counter[label] += 1
+
+        return OrderedDict({
+            'accuracy': accuracy,
+            'count': labels.shape[0],
+            'loss': loss,
+            'class_correct': class_correct,
+            'class_counter': class_counter
+        })
+            
     def test_epoch_end(self, outputs) -> dict:
         accuracy = loss = 0.0
         count = 0
+        all_class_correct = list(0 for i in range(10))
+        all_class_counter = list(0 for i in range(10))
+
         for output in outputs:
             accuracy += output['accuracy']
             loss += output['loss'].data.item()
             count += output['count']
-
+            for i in range(10):
+                class_correct = output['class_correct']
+                class_counter = output['class_counter']
+                all_class_correct = [x + y for x, y in zip(all_class_correct, class_correct)]
+                all_class_counter = [x + y for x, y in zip(all_class_counter, class_counter)]
+        class_accuracy = {'test_accuracy_{}'.format(i): x/y for i, x, y in zip(list(range(10)), all_class_correct, all_class_counter)} 
         results = {
-            'test_accuracy': accuracy / count,
+            'test_mean_accuracy': accuracy / count,
             'test_loss': loss / count,
         }
-
+        results.update(class_accuracy)
         self.logger.log_metrics(results, step=self.current_epoch)
 
         return results
