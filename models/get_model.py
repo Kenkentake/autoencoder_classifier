@@ -5,9 +5,11 @@ from models.simple_cnn_model import SimpleCNNModel
 
 def get_model(
     args,
+    run_id: str,
+    tmp_results_dir: str,
     device: str,
     hparams: dict,
-    trial=None,
+    trial=None
 ) -> LightningModule:
     model_type = args.TRAIN.MODEL_TYPE.lower()
 
@@ -28,6 +30,8 @@ def get_model(
             in_channel=args.DATA.INPUT_DIM,
             out_channel=len(args.DATA.CLASSES),
             trial=trial,
+            run_id=run_id,
+            tmp_results_dir=tmp_results_dir
         )
     else:
         raise NotImplementedError()

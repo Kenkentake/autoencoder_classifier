@@ -2,10 +2,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from collections import OrderedDict
-
 from pytorch_lightning import LightningModule
 
 from optim import get_optimizer, get_scheduler
+
+from utils import save_imgs
 
 
 class ConvAutoEncoderCLFModel(LightningModule):
@@ -17,28 +18,36 @@ class ConvAutoEncoderCLFModel(LightningModule):
         in_channel: int,
         out_channel: int,
         trial,
+        run_id: str,
+        tmp_results_dir: str
     ) -> None:
         super(ConvAutoEncoderCLFModel, self).__init__()
         self.args = args
         self._device = device
         self.hparams = hparams
         self.trial = trial
+        self.run_id = run_id
+        self.tmp_results_dir = tmp_results_dir
 
+        self.weight = self.args.TRAIN.LOSS_WEIGHT
         self.cross_entropy_loss = nn.CrossEntropyLoss()
         self.mse_loss = nn.MSELoss()
 
         # encoder
         self.encoder = nn.Sequential(
                             nn.Conv2d(in_channel, 16, 3, padding=1),
+                            nn.BatchNorm2d(16),
                             nn.ReLU(inplace=True),
                             nn.MaxPool2d(2, 2),
                             nn.Conv2d(16, 4, 3, padding=1),
+                            nn.BatchNorm2d(4),
                             nn.ReLU(inplace=True),
                             nn.MaxPool2d(2, 2)
                         )
         # decoder
         self.decoder = nn.Sequential(
                             nn.ConvTranspose2d(4, 16, 2, stride=2),
+                            nn.BatchNorm2d(16),
                             nn.ReLU(inplace=True),
                             nn.ConvTranspose2d(16, 3, 2, stride=2),
                             nn.Sigmoid()
@@ -74,7 +83,7 @@ class ConvAutoEncoderCLFModel(LightningModule):
 
         ae_loss = self.mse_loss(decoded, inputs)
         clf_loss = self.cross_entropy_loss(outputs, labels)
-        loss = 0.5 * ae_loss + 0.5 * clf_loss
+        loss = self.weight[0] * ae_loss + self.weight[1] * clf_loss
 
         accuracy = (outputs.argmax(1) == labels).sum().item()
 
@@ -83,21 +92,24 @@ class ConvAutoEncoderCLFModel(LightningModule):
             'accuracy': accuracy,
             'count': labels.shape[0],
             'loss': loss,
+            'ae_loss': ae_loss,
             'clf_loss': clf_loss
         })
 
     def training_epoch_end(self, outputs) -> None:
-        accuracy = loss = clf_loss = 0.0
+        accuracy = loss = ae_loss = clf_loss = 0.0
         count = 0
         for output in outputs:
             accuracy += output['accuracy']
             loss += output['loss'].data.item()
+            ae_loss += output['ae_loss'].data.item()
             clf_loss += output['clf_loss'].data.item()
             count += output['count']
 
         results = {
             'training_accuracy': accuracy / count,
             'training_loss': loss / count,
+            'training_ae_loss': ae_loss / count,
             'training_clf_loss': clf_loss / count
         }
 
@@ -111,7 +123,7 @@ class ConvAutoEncoderCLFModel(LightningModule):
 
         ae_loss = self.mse_loss(decoded, inputs)
         clf_loss = self.cross_entropy_loss(outputs, labels)
-        loss = 0.5 * ae_loss + 0.5 * clf_loss
+        loss = self.weight[0] * ae_loss + self.weight[1] * clf_loss
 
         accuracy = (outputs.argmax(1) == labels).sum().item()
 
@@ -119,21 +131,24 @@ class ConvAutoEncoderCLFModel(LightningModule):
             'accuracy': accuracy,
             'count': labels.shape[0],
             'loss': loss,
+            'ae_loss': ae_loss,
             'clf_loss': clf_loss
         })
 
     def validation_epoch_end(self, outputs) -> dict:
-        accuracy = loss = clf_loss = 0.0
+        accuracy = loss = ae_loss = clf_loss = 0.0
         count = 0
         for output in outputs:
             accuracy += output['accuracy']
             loss += output['loss'].data.item()
+            ae_loss += output['ae_loss'].data.item()
             clf_loss += output['clf_loss'].data.item()
             count += output['count']
 
         results = {
             'validation_accuracy': accuracy / count,
             'validation_loss': loss / count,
+            'validation_ae_loss': ae_loss / count,
             'validation_clf_loss': clf_loss / count
         }
 
@@ -145,9 +160,13 @@ class ConvAutoEncoderCLFModel(LightningModule):
         inputs, labels = batch
         outputs, decoded = self(inputs)
 
+        # save input and decoded img
+        if batch_idx < 5 :
+            save_imgs(batch_idx, inputs[:5], decoded[:5], self.run_id, self.tmp_results_dir)
+
         ae_loss = self.mse_loss(decoded, inputs)
         clf_loss = self.cross_entropy_loss(outputs, labels)
-        loss = 0.5 * ae_loss + 0.5 * clf_loss
+        loss = self.weight[0] * ae_loss + self.weight[1] * clf_loss
 
         accuracy = (outputs.argmax(1) == labels).sum().item()
 
@@ -163,13 +182,14 @@ class ConvAutoEncoderCLFModel(LightningModule):
             'accuracy': accuracy,
             'count': labels.shape[0],
             'loss': loss,
+            'ae_loss': ae_loss,
             'clf_loss': clf_loss,
             'class_correct': class_correct,
             'class_counter': class_counter
         })
             
     def test_epoch_end(self, outputs) -> dict:
-        accuracy = loss = clf_loss = 0.0
+        accuracy = loss = ae_loss = clf_loss = 0.0
         count = 0
         all_class_correct = list(0 for i in range(10))
         all_class_counter = list(0 for i in range(10))
@@ -177,6 +197,7 @@ class ConvAutoEncoderCLFModel(LightningModule):
         for output in outputs:
             accuracy += output['accuracy']
             loss += output['loss'].data.item()
+            ae_loss += output['ae_loss'].data.item()
             clf_loss += output['clf_loss'].data.item()
             count += output['count']
             for i in range(10):
@@ -188,6 +209,7 @@ class ConvAutoEncoderCLFModel(LightningModule):
         results = {
             'test_mean_accuracy': accuracy / count,
             'test_loss': loss / count,
+            'test_ae_loss': ae_loss / count,
             'test_clf_loss': clf_loss / count
         }
         results.update(class_accuracy)
