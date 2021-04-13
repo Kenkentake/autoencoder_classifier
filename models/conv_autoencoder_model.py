@@ -8,7 +8,7 @@ from pytorch_lightning import LightningModule
 from optim import get_optimizer, get_scheduler
 
 
-class AutoEncoderCNNModel(LightningModule):
+class ConvAutoEncoderCLFModel(LightningModule):
     def __init__(
         self,
         args,
@@ -18,7 +18,7 @@ class AutoEncoderCNNModel(LightningModule):
         out_channel: int,
         trial,
     ) -> None:
-        super(AutoEncoderCNNModel, self).__init__()
+        super(ConvAutoEncoderCLFModel, self).__init__()
         self.args = args
         self._device = device
         self.hparams = hparams
