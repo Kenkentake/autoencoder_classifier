@@ -1,0 +1,6 @@
+MLFLOW:
+  EXPERIMENT_NAME: 'autoencoder_cnn'
+
+TRAIN:
+  MAX_EPOCHS: 100
+  MODEL_TYPE: 'autoencoder_cnn'
