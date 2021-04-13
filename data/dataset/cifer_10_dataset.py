@@ -59,8 +59,8 @@ class CIFAR10Dataset:
         validation_dataset.data = validation_dataset.data[val_class_indices]
         train_num = len(train_dataset)
         validation_num = len(validation_dataset)
-        print('Training data is {}, {} in toatal'.format(train_class_counts, train_num))
-        print('Validation data is {}, {} in toatal'.format(val_class_counts, validation_num))
+        # print('Training data is {}, {} in toatal'.format(train_class_counts, train_num))
+        # print('Validation data is {}, {} in toatal'.format(val_class_counts, validation_num))
 
         # split train and val
         indices = list(range(train_num))

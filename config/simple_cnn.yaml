@@ -1,2 +1,6 @@
 MLFLOW:
   EXPERIMENT_NAME: 'simple_cnn'
+
+TRAIN:
+  MAX_EPOCHS: 2 
+  MODEL_TYPE: 'simple_cnn'
