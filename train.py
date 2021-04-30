@@ -47,18 +47,21 @@ def main(
         num_workers=args.DATA.NUM_WORKERS,
     )
 
+    mlflow_logger = MLFlowLogger(
+        experiment_name=args.MLFLOW.EXPERIMENT_NAME,
+    )
+
+    run_id = mlflow_logger.run_id
     model = get_model(
-        args=args,
+        args,
+        run_id,
+        tmp_results_dir,
         device=device,
         hparams={
             'learning rate': args.TRAIN.LR,
             'batch size': args.TRAIN.BATCH_SIZE,
-        },
+        }
     ).to(device)
-
-    mlflow_logger = MLFlowLogger(
-        experiment_name=args.MLFLOW.EXPERIMENT_NAME,
-    )
 
     checkpoint_callback = ModelCheckpoint(monitor='validation_accuracy')
 
@@ -72,6 +75,7 @@ def main(
     )
 
     try:
+        # run_id = mlflow_logger.run_id
         exist_error = False
         trainer.fit(model, train_dataloader, validation_dataloader)
         trainer.test(test_dataloaders=test_dataloader)

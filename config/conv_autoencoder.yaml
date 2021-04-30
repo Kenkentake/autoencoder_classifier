@@ -2,5 +2,7 @@ MLFLOW:
   EXPERIMENT_NAME: 'conv_autoencoder'
 
 TRAIN:
-  MAX_EPOCHS: 100
+  MAX_EPOCHS: 30
   MODEL_TYPE: 'conv_autoencoder'
+  # [ae_weight, clf_weight]
+  LOSS_WEIGHT: [0.8, 0.2]

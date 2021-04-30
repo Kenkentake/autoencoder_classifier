@@ -21,6 +21,7 @@ _C.TRAIN.MOMENTUM = 0.9
 _C.TRAIN.OPTIMIZER_TYPE = 'sgd'
 _C.TRAIN.SCHEDULER_TYPE = 'step_lr'
 _C.TRAIN.STEP_SIZE = 5
+_C.TRAIN.LOSS_WEIGHT = []
 
 _C.MLFLOW = CfgNode()
 _C.MLFLOW.EXPERIMENT_NAME = 'Default'
@@ -38,6 +39,6 @@ _C.DATA.CLASSES = (
 _C.DATA.DATASET_TYPE = 'cifer10'
 _C.DATA.INPUT_DIM = 3
 _C.DATA.NUM_WORKERS = 32
-# ['random_rotation', 'random_horizontal_flip', 'random_vertical_flip', 'color_jitter', 'to_tensor', 'normalize']
-_C.DATA.TRANSFORM_LIST = ['random_rotation', 'random_horizontal_flip', 'random_vertical_flip', 'color_jitter', 'to_tensor', 'normalize']
+# DataAug_List: ['random_rotation', 'random_horizontal_flip', 'random_vertical_flip', 'color_jitter', 'to_tensor', 'normalize']
+_C.DATA.TRANSFORM_LIST = ['to_tensor', 'normalize']
 _C.DATA.VALIDATION_SIZE = 0.25
