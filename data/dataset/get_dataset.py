@@ -29,6 +29,7 @@ def get_dataset(args):
 
     if dataset_type == 'cifer10':
         dataset = CIFAR10Dataset(
+            sampling_class_counts = args.DATA.SAMPLING_CLASS_COUNTS,
             root=args.DATA.CACHE_DIR,
             transform=transform,
             validation_size=args.DATA.VALIDATION_SIZE

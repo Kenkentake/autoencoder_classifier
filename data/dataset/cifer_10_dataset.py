@@ -8,8 +8,9 @@ from torch.utils.data import Subset
 
 class CIFAR10Dataset:
 
-    def __init__(self, root: str, transform, validation_size: float) -> None:
+    def __init__(self, sampling_class_counts: list, root: str, transform, validation_size: float) -> None:
         self.set_train_and_validation_data(
+            sampling_class_counts=sampling_class_counts,
             train=True,
             download=True,
             root=root,
@@ -23,6 +24,7 @@ class CIFAR10Dataset:
     
     def set_train_and_validation_data(
         self,
+        sampling_class_counts: list,
         download: bool,
         root: str,
         train: bool,
@@ -35,19 +37,16 @@ class CIFAR10Dataset:
         targets = np.array(train_dataset.targets)
         classes, class_counts = np.unique(targets, return_counts=True)
         num_classes = len(classes)
-        # create artificial imbalanced class count
-        # [airplane, automobile, bird, cat, deer, dog, frog, horse, ship, track]
-        imbal_class_counts = [5000, 5000, 2500, 5000, 2500, 5000, 5000, 5000, 5000, 2500]
         # get class indices
         class_indices = [np.where(targets == i)[0] for i in range(num_classes)]
-        # get imbalanced number of instances
-        imbal_class_indices = [class_idx[:class_count] for class_idx, class_count in zip(class_indices, imbal_class_counts)]
+        # get sampling number of instances
+        sampling_class_indices = [class_idx[:class_count] for class_idx, class_count in zip(class_indices, sampling_class_counts)]
 
         # [airplane, automobile, bird, cat, deer, dog, frog, horse, ship, track]
         train_class_counts = [4500, 4500, 2000, 4500, 2000, 4500, 4500, 4500, 4500, 2000]
-        val_class_counts = [imbal - train for (imbal, train) in zip(imbal_class_counts, train_class_counts)]
-        train_class_indices = [class_idx[:class_count] for class_idx, class_count in zip(imbal_class_indices, train_class_counts)]
-        val_class_indices = [class_idx[class_count:] for class_idx, class_count in zip(imbal_class_indices, train_class_counts)]
+        val_class_counts = [sampling - train for (sampling, train) in zip(sampling_class_counts, train_class_counts)]
+        train_class_indices = [class_idx[:class_count] for class_idx, class_count in zip(sampling_class_indices, train_class_counts)]
+        val_class_indices = [class_idx[class_count:] for class_idx, class_count in zip(sampling_class_indices, train_class_counts)]
 
         train_class_indices = np.hstack(train_class_indices)
         val_class_indices = np.hstack(val_class_indices)
