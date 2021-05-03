@@ -4,6 +4,8 @@ MLFLOW:
 TRAIN:
   MAX_EPOCHS: 30
   MODEL_TYPE: 'conv_autoencoder'
+  # '.tmp_results/2021-05-03_11-50-24/weights.ckpt'
+  LOAD_WEIGHT_PATH: ''
   # [ae_weight, clf_weight]
   LOSS_WEIGHT: [0.5, 0.5]
   # LOSS_WEIGHT: [1, 0]

@@ -52,6 +52,7 @@ def main(
     )
 
     run_id = mlflow_logger.run_id
+    print(torch.load('.tmp_results/2021-05-03_11-50-24/weights.ckpt'))
     model = get_model(
         args,
         run_id,
@@ -62,11 +63,14 @@ def main(
             'batch size': args.TRAIN.BATCH_SIZE,
         }
     ).to(device)
+    if len(args.TRAIN.LOAD_WEIGHT_PATH) != 0:
+        model.load_state_dict(torch.load('.tmp_results/2021-05-03_11-50-24/weights.ckpt'))
 
     checkpoint_callback = ModelCheckpoint(monitor='validation_accuracy')
 
     trainer = pl.Trainer(
         callbacks=[checkpoint_callback],
+        default_root_dir=tmp_results_dir,
         distributed_backend=args.TRAIN.DISTRIBUTED_BACKEND,
         gpus=args.TRAIN.GPUS,
         logger=mlflow_logger,
@@ -93,6 +97,7 @@ def main(
             print(f'Run id: {run_id}')
             sys.exit(1)
     finally:
+        # torch.save(model.state_dict(), join(tmp_results_dir, 'weights.ckpt'))
         run_id = mlflow_logger.run_id
         if run_id is not None:
             with open(args_file_path, 'w') as f:
@@ -104,7 +109,7 @@ def main(
             mlflow_client.log_artifact(run_id, train_log_file_path)
             if exist_error:
                 mlflow_client.log_artifact(run_id, error_file_path)
-            rmtree(tmp_results_dir, ignore_errors=True)
+            # rmtree(tmp_results_dir, ignore_errors=True)
 
 
 if __name__ == '__main__':
