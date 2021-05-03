@@ -37,11 +37,11 @@ _C.DATA.CLASSES = (
     'plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'
 )
 _C.DATA.DATASET_TYPE = 'cifer10'
+_C.DATA.IMG_SIZE = 32
 _C.DATA.INPUT_DIM = 3
 _C.DATA.NUM_WORKERS = 32
-# [airplane, automobile, bird, cat, deer, dog, frog, horse, ship, track]
 # imbal_class_counts = [5000, 5000, 2500, 5000, 2500, 5000, 5000, 5000, 5000, 2500]
 _C.DATA.SAMPLING_CLASS_COUNTS = [2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500]
 # DataAug_List: ['random_rotation', 'random_horizontal_flip', 'random_vertical_flip', 'color_jitter', 'to_tensor', 'normalize']
-_C.DATA.TRANSFORM_LIST = ['to_tensor']
+_C.DATA.TRANSFORM_LIST = ['resize', 'to_tensor']
 _C.DATA.VALIDATION_SIZE = 0.25

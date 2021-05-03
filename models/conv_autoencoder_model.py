@@ -6,7 +6,7 @@ from pytorch_lightning import LightningModule
 
 from optim import get_optimizer, get_scheduler
 
-from utils import save_imgs
+from utils import save_imgs, save_confusion_matrix
 
 
 class ConvAutoEncoderCLFModel(LightningModule):
@@ -80,13 +80,10 @@ class ConvAutoEncoderCLFModel(LightningModule):
     def training_step(self, batch, batch_idx):
         inputs, labels = batch
         outputs, decoded = self(inputs)
-
         ae_loss = self.mse_loss(decoded, inputs)
         clf_loss = self.cross_entropy_loss(outputs, labels)
         loss = self.weight[0] * ae_loss + self.weight[1] * clf_loss
-
         accuracy = (outputs.argmax(1) == labels).sum().item()
-
 
         return OrderedDict({
             'accuracy': accuracy,
@@ -179,6 +176,8 @@ class ConvAutoEncoderCLFModel(LightningModule):
             class_counter[label] += 1
 
         return OrderedDict({
+            'preds': outputs.argmax(1),
+            'labels': labels,
             'accuracy': accuracy,
             'count': labels.shape[0],
             'loss': loss,
@@ -193,8 +192,12 @@ class ConvAutoEncoderCLFModel(LightningModule):
         count = 0
         all_class_correct = list(0 for i in range(10))
         all_class_counter = list(0 for i in range(10))
+        preds_all = []
+        labels_all = [] 
 
         for output in outputs:
+            preds_all.extend(output['preds'].tolist())
+            labels_all.extend(output['labels'].tolist())
             accuracy += output['accuracy']
             loss += output['loss'].data.item()
             ae_loss += output['ae_loss'].data.item()
@@ -205,6 +208,7 @@ class ConvAutoEncoderCLFModel(LightningModule):
                 class_counter = output['class_counter']
                 all_class_correct = [x + y for x, y in zip(all_class_correct, class_correct)]
                 all_class_counter = [x + y for x, y in zip(all_class_counter, class_counter)]
+        save_confusion_matrix(labels_all, preds_all, self.args.DATA.CLASSES, self.run_id, self.tmp_results_dir)
         class_accuracy = {'test_accuracy_{}'.format(i): x/y for i, x, y in zip(list(range(10)), all_class_correct, all_class_counter)} 
         results = {
             'test_mean_accuracy': accuracy / count,
