@@ -8,12 +8,13 @@ from torch.utils.data import Subset
 
 class CIFAR10Dataset:
 
-    def __init__(self, sampling_class_counts: list, root: str, transform, validation_size: float) -> None:
+    def __init__(self, root: str, sampling_class_counts: list, train_class_counts: list, transform, validation_size: float) -> None:
         self.set_train_and_validation_data(
-            sampling_class_counts=sampling_class_counts,
-            train=True,
             download=True,
             root=root,
+            sampling_class_counts=sampling_class_counts,
+            train=True,
+            train_class_counts=train_class_counts,
             transform=transform,
             validation_size=validation_size,
         )
@@ -25,6 +26,7 @@ class CIFAR10Dataset:
     def set_train_and_validation_data(
         self,
         sampling_class_counts: list,
+        train_class_counts: list,
         download: bool,
         root: str,
         train: bool,
@@ -43,7 +45,6 @@ class CIFAR10Dataset:
         sampling_class_indices = [class_idx[:class_count] for class_idx, class_count in zip(class_indices, sampling_class_counts)]
 
         # [airplane, automobile, bird, cat, deer, dog, frog, horse, ship, track]
-        train_class_counts = [4500, 4500, 2000, 4500, 2000, 4500, 4500, 4500, 4500, 2000]
         val_class_counts = [sampling - train for (sampling, train) in zip(sampling_class_counts, train_class_counts)]
         train_class_indices = [class_idx[:class_count] for class_idx, class_count in zip(sampling_class_indices, train_class_counts)]
         val_class_indices = [class_idx[class_count:] for class_idx, class_count in zip(sampling_class_indices, train_class_counts)]
@@ -61,10 +62,6 @@ class CIFAR10Dataset:
         # print('Training data is {}, {} in toatal'.format(train_class_counts, train_num))
         # print('Validation data is {}, {} in toatal'.format(val_class_counts, validation_num))
 
-        # split train and val
-        indices = list(range(train_num))
-        split = int(np.floor(validation_size * train_num))
-        train_indices, validation_indices = indices[split:], indices[:split]
         self.train_data_dict = {
             'train_dataset': train_dataset,
             'val_dataset': validation_dataset

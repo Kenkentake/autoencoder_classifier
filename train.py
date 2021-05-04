@@ -52,7 +52,6 @@ def main(
     )
 
     run_id = mlflow_logger.run_id
-    print(torch.load('.tmp_results/2021-05-03_11-50-24/weights.ckpt'))
     model = get_model(
         args,
         run_id,

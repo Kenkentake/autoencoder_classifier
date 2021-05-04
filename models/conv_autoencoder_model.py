@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -81,7 +82,9 @@ class ConvAutoEncoderCLFModel(LightningModule):
         inputs, labels = batch
         outputs, decoded = self(inputs)
         ae_loss = self.mse_loss(decoded, inputs)
-        clf_loss = self.cross_entropy_loss(outputs, labels)
+        weight = torch.tensor(self.args.TRAIN.CE_CLASS_WEIGHT).to(self._device)
+        cross_entropy_loss = nn.CrossEntropyLoss(weight=weight)
+        clf_loss = cross_entropy_loss(outputs, labels)
         loss = self.weight[0] * ae_loss + self.weight[1] * clf_loss
         accuracy = (outputs.argmax(1) == labels).sum().item()
 
