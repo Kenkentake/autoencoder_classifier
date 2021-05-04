@@ -96,7 +96,7 @@ def main(
             print(f'Run id: {run_id}')
             sys.exit(1)
     finally:
-        # torch.save(model.state_dict(), join(tmp_results_dir, 'weights.ckpt'))
+        torch.save(model.state_dict(), join(tmp_results_dir, 'weights.ckpt'))
         run_id = mlflow_logger.run_id
         if run_id is not None:
             with open(args_file_path, 'w') as f:

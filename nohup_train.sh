@@ -3,7 +3,8 @@ TIMESTAMP=`date +%Y-%m-%d_%H-%M-%S`
 TMP_RESULTS_DIR="$(pwd)/.tmp_results/${TIMESTAMP}"
 ARGS_FILE="${TMP_RESULTS_DIR}/args.yaml"
 TRAIN_LOG_FILE="${TMP_RESULTS_DIR}/log.txt"
-CFG_FILE_PATH="$(pwd)/config/conv_autoencoder.yaml" 
+CFG_FILE_PATH="$(pwd)/config/conv_ae_with_cnn.yaml" 
+# CFG_FILE_PATH="$(pwd)/config/conv_autoencoder.yaml" 
 # CFG_FILE_PATH="$(pwd)/config/simple_cnn.yaml" 
 mkdir -p $TMP_RESULTS_DIR
 
