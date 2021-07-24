@@ -2,12 +2,12 @@ MLFLOW:
   EXPERIMENT_NAME: 'conv_ae_with_cnn'
 
 TRAIN:
-  # LOAD_WEIGHT_PATH: '.tmp_results/2021-05-03_11-50-24/weights.ckpt'
   LOAD_WEIGHT_PATH: ''
+  # LOAD_WEIGHT_PATH: '.tmp_results/2021-05-04_12-47-00/weights.ckpt'
   # [ae_weight, clf_weight]
-  LOSS_WEIGHT: [0.1, 0.9]
+  LOSS_WEIGHT: [0., 0.9]
   # LOSS_WEIGHT: [1, 0]
-  MAX_EPOCHS: 30
+  MAX_EPOCHS: 100
   MODEL_TYPE: 'conv_ae_with_cnn'
   MOMENTUM: 0.9
   OPTIMIZER_TYPE: 'sgd'

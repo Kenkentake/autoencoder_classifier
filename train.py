@@ -63,7 +63,7 @@ def main(
         }
     ).to(device)
     if len(args.TRAIN.LOAD_WEIGHT_PATH) != 0:
-        model.load_state_dict(torch.load('.tmp_results/2021-05-03_11-50-24/weights.ckpt'))
+        model.load_state_dict(torch.load(args.TRAIN.LOAD_WEIGHT_PATH))
 
     checkpoint_callback = ModelCheckpoint(monitor='validation_accuracy')
 
@@ -96,7 +96,7 @@ def main(
             print(f'Run id: {run_id}')
             sys.exit(1)
     finally:
-        torch.save(model.state_dict(), join(tmp_results_dir, 'weights.ckpt'))
+        # torch.save(model.state_dict(), join(tmp_results_dir, 'weights.ckpt'))
         run_id = mlflow_logger.run_id
         if run_id is not None:
             with open(args_file_path, 'w') as f:

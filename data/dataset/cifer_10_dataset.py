@@ -48,6 +48,8 @@ class CIFAR10Dataset:
         val_class_counts = [sampling - train for (sampling, train) in zip(sampling_class_counts, train_class_counts)]
         train_class_indices = [class_idx[:class_count] for class_idx, class_count in zip(sampling_class_indices, train_class_counts)]
         val_class_indices = [class_idx[class_count:] for class_idx, class_count in zip(sampling_class_indices, train_class_counts)]
+        print('(((())))')
+        print(train_class_indices)
 
         train_class_indices = np.hstack(train_class_indices)
         val_class_indices = np.hstack(val_class_indices)
